@@ -1,5 +1,6 @@
 from http.server import HTTPServer, BaseHTTPRequestHandler
 import json
+import networkx as nx
 
 class Serv(BaseHTTPRequestHandler):
     def _set_headers(self):
@@ -24,12 +25,28 @@ class Serv(BaseHTTPRequestHandler):
         self.end_headers()
 
         data = json.loads(self.data_string)
-        with open("test123456.json", "w") as outfile:
-            json.dump(data, outfile)
-        print ("{}".format(data))
-        f = open("for_presen.py")
-        self.wfile.write(bytes(f.read(), 'utf-8'))
+        
+        try:
+            self.dkt(data)
+        except:
+            print('Dijkstra error!')
+
+        # with open("test123456.json", "w") as outfile:
+        #     json.dump(data, outfile)
+        # print ("{}".format(data))
+        # f = open("for_presen.py")
+        # self.wfile.write(bytes(f.read(), 'utf-8'))
         return
+
+    def dkt(self, json_G):
+        G = nx.Graph()
+        for edge in json_G['edges']:
+            G.add_edge(edge['begin'], edge['end'], weight=int(edge['len']))
+
+        # paths = dict() 
+
+        # for con in json_G['connections']:
+        #     short = nx.single_source_dijkstra(G, con['begin'], con['end'], weight='weight')
 
 def run(server_class=HTTPServer, handler_class=Serv, port=8080):
     server_address = ('localhost', port)

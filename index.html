@@ -12,12 +12,20 @@
             <dt id="message-label"><label class="optional" for="message">Enter Message</label></dt>
             <dd id="message-element">
             <textarea cols="80" rows="50" id="message" name="message">
-        [{"resources": {"dut": "any_ts", "endpoint1": "multistream_endpoint", "endpoint2": "multistream_endpoint"}},
-        
-        {"action": "create_conference", "serverName": "dut", "conferenceName": "GURU_SLAVE_TS"},
-        
-        {"action": "dial_out_ep", "serverName": "dut", "confName": "GURU_SLAVE_TS", "epName": "endpoint1"}
-        ]
+                {
+                    "edges": [
+                                {"begin": "A", "end": "B", "len": 5},
+                                {"begin": "A", "end": "C", "len": 10},
+                                {"begin": "B", "end": "D", "len": 12},
+                                {"begin": "B", "end": "E", "len": 9},
+                                {"begin": "D", "end": "E", "len": 5}
+                            ],
+                    
+                    "connections": [
+                                {"begin":"A", "end": "E"},
+                                {"begin":"C", "end": "D"}
+                            ]
+                }
                 </textarea></dd>
             <dt id="id-label">&nbsp;</dt>
             <dd id="id-element">
@@ -40,7 +48,7 @@
         var posting = $.post(url, message)
         
         posting.done(function( data ) {
-          alert(message);
+          alert('done');
         });
         });
         
