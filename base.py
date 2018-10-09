@@ -20,53 +20,25 @@ class Serv(BaseHTTPRequestHandler):
         self._set_headers()
         print ("in post method")
         self.data_string = self.rfile.read(int(self.headers['Content-Length']))
-        self.send_response(200)
-        self.end_headers()
         data = json.loads(self.data_string)
+        self.send_response(200)
+        self.send_header('Content-type', 'application/json')
+        self.end_headers()
         try:
-            self.dkt(data)
+            self.wfile.write(json.dumps(self.dkt(data)).encode())
         except:
             print('Dijkstra error!')
-        # with open("test123456.json", "w") as outfile:
-        #     json.dump(data, outfile)
-        # print ("{}".format(data))
-        # f = open("for_presen.py")
-        # self.wfile.write(bytes(f.read(), 'utf-8'))
         return
 
     def dkt(self, json_G):
         G = nx.Graph()
         for edge in json_G['edges']:
             G.add_edge(edge['begin'], edge['end'], weight=int(edge['len']))
-            print(G)
-        pathlengths = []
-
-        print("source vertex {target:length, }")
-        for v in G.nodes():
-            spl = dict(nx.single_source_shortest_path_length(G, v))
-            print('{} {} '.format(v, spl))
-            for p in spl:
-                pathlengths.append(spl[p])
-        # print('')
-
-        # '{} {} {} {}'.format(*el)
-        # print('Caminhos possíveis:')
-
-        short = nx.single_source_dijkstra(G, 'J', 'E', weight='weight')
-
-        nx.draw(G, with_labels=True, font_weight='bold')
-        # plt.show()
-        # plt.savefig("graph.png")
-        print("menor distancia")
-        print('Distancia : {}, Vértices: {}'.format(*short))
-
-        print("Todas as Rotas")
-        ['Rota ' + str(i + 1) + ': {}'.format(el[i]) for i in range(len(el))]
-
-        # paths = dict()
-
-        # for con in json_G['connections']:
-        #     short = nx.single_source_dijkstra(G, con['begin'], con['end'], weight='weight')
+        resp = dict()
+        for conection in json_G['connections']:
+            short = nx.single_source_dijkstra(G, conection['begin'], conection['end'], weight='weight')
+            resp["{}-{}".format(conection['begin'], conection['end'])] = short
+        return resp
 
 def run(server_class=HTTPServer, handler_class=Serv, port=8080):
     server_address = ('localhost', port)
