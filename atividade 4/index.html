@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js">
+<!--<![endif]-->
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title></title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style type="text/css">
+        body{
+            overflow-y: hidden;
+        }
+        body,
+        select {
+            font: 10pt sans;
+        }
+
+        #mynetwork {
+            position: relative;
+            width: 100%;
+            height: 800px;
+            /* border: 1px solid lightgray; */
+        }
+
+        table.legend_table {
+            font-size: 11px;
+            border-width: 1px;
+            border-color: #d3d3d3;
+            border-style: solid;
+        }
+
+        table.legend_table,
+        td {
+            border-width: 1px;
+            border-color: #d3d3d3;
+            border-style: solid;
+            padding: 2px;
+        }
+
+        div.table_content {
+            width: 80px;
+            text-align: center;
+        }
+
+        div.table_description {
+            width: 100px;
+        }
+
+        #operation {
+            font-size: 28px;
+        }
+
+        #node-popUp {
+            display: none;
+            position: absolute;
+            top: 350px;
+            left: 170px;
+            z-index: 299;
+            width: 250px;
+            height: 120px;
+            background-color: #f9f9f9;
+            border-style: solid;
+            border-width: 3px;
+            border-color: #5394ed;
+            padding: 10px;
+            text-align: center;
+        }
+
+        #edge-popUp {
+            display: none;
+            position: absolute;
+            top: 350px;
+            left: 170px;
+            z-index: 299;
+            width: 250px;
+            height: 90px;
+            background-color: #f9f9f9;
+            border-style: solid;
+            border-width: 3px;
+            border-color: #5394ed;
+            padding: 10px;
+            text-align: center;
+        }
+    </style>
+    <script type="text/javascript" src="./node_modules/vis/dist/vis.min.js"></script>
+    <script src="./node_modules/vis/examples/network/exampleUtil.js"></script>
+    <script src="./js/feed.js"></script>
+    <link rel="stylesheet" href="./node_modules/vis/dist/vis-network.min.css">
+    <script type="text/javascript">
+        var nodes = null;
+        var edges = null;
+        var network = null;
+        // randomly create some nodes and edges
+        // var data = getScaleFreeNetwork(25);
+        var data = setData();
+
+        var seed = 2;
+
+
+        function destroy() {
+            if (network !== null) {
+                network.destroy();
+                network = null;
+            }
+        }
+
+        function draw() {
+            destroy();
+            nodes = [];
+            edges = [];
+
+            // create a network
+            var container = document.getElementById('mynetwork');
+            var options = {
+                autoResize: true,
+                height: '100%',
+                width: '100%',
+                clickToUse : true,
+                layout: {
+                    randomSeed: seed
+                }, // just to make sure the layout is the same when the locale is changed
+                locale: "pt-br",
+                manipulation: {
+                    addNode: function (data, callback) {
+                        // filling in the popup DOM elements
+                        document.getElementById('node-operation').innerHTML = "Add Node";
+                        editNode(data, clearNodePopUp, callback);
+                    },
+                    editNode: function (data, callback) {
+                        // filling in the popup DOM elements
+                        document.getElementById('node-operation').innerHTML = "Edit Node";
+                        editNode(data, cancelNodeEdit, callback);
+                    },
+                    addEdge: function (data, callback) {
+                        if (data.from == data.to) {
+                            var r = confirm("Do you want to connect the node to itself?");
+                            if (r != true) {
+                                callback(null);
+                                return;
+                            }
+                        }
+                        document.getElementById('edge-operation').innerHTML = "Add Edge";
+                        editEdgeWithoutDrag(data, callback);
+                    },
+                    editEdge: {
+                        editWithoutDrag: function (data, callback) {
+                            document.getElementById('edge-operation').innerHTML = "Edit Edge";
+                            editEdgeWithoutDrag(data, callback);
+                        }
+                    }
+                }
+            };
+            network = new vis.Network(container, data, options);
+        }
+
+        function editNode(data, cancelAction, callback) {
+            document.getElementById('node-label').value = data.label;
+            document.getElementById('node-saveButton').onclick = saveNodeData.bind(this, data, callback);
+            document.getElementById('node-cancelButton').onclick = cancelAction.bind(this, callback);
+            document.getElementById('node-popUp').style.display = 'block';
+        }
+
+        // Callback passed as parameter is ignored
+        function clearNodePopUp() {
+            document.getElementById('node-saveButton').onclick = null;
+            document.getElementById('node-cancelButton').onclick = null;
+            document.getElementById('node-popUp').style.display = 'none';
+        }
+
+        function cancelNodeEdit(callback) {
+            clearNodePopUp();
+            callback(null);
+        }
+
+        function saveNodeData(data, callback) {
+            data.label = document.getElementById('node-label').value;
+            clearNodePopUp();
+            callback(data);
+        }
+
+        function editEdgeWithoutDrag(data, callback) {
+            // filling in the popup DOM elements
+            document.getElementById('edge-label').value = data.label;
+            document.getElementById('edge-saveButton').onclick = saveEdgeData.bind(this, data, callback);
+            document.getElementById('edge-cancelButton').onclick = cancelEdgeEdit.bind(this, callback);
+            document.getElementById('edge-popUp').style.display = 'block';
+        }
+
+        function clearEdgePopUp() {
+            document.getElementById('edge-saveButton').onclick = null;
+            document.getElementById('edge-cancelButton').onclick = null;
+            document.getElementById('edge-popUp').style.display = 'none';
+        }
+
+        function cancelEdgeEdit(callback) {
+            clearEdgePopUp();
+            callback(null);
+        }
+
+        function saveEdgeData(data, callback) {
+            if (typeof data.to === 'object')
+                data.to = data.to.id
+            if (typeof data.from === 'object')
+                data.from = data.from.id
+            data.label = document.getElementById('edge-label').value;
+            clearEdgePopUp();
+            callback(data);
+        }
+
+        function init() {
+            // setDefaultLocale();
+            // addNodeMode();
+            draw();
+        }
+    </script>
+</head>
+
+<body onload="init();">
+
+    <div id="node-popUp">
+        <span id="node-operation">node</span> <br>
+        <table style="margin:auto;">
+            <tr>
+                <td>id</td>
+                <td><input id="node-id" value="new value" /></td>
+            </tr>
+            <tr>
+                <td>label</td>
+                <td><input id="node-label" value="new value" /></td>
+            </tr>
+        </table>
+        <input type="button" value="save" id="node-saveButton" />
+        <input type="button" value="cancel" id="node-cancelButton" />
+    </div>
+
+    <div id="edge-popUp">
+        <span id="edge-operation">edge</span> <br>
+        <table style="margin:auto;">
+            <tr>
+                <td>label</td>
+                <td><input id="edge-label" value="new value" /></td>
+            </tr>
+        </table>
+        <input type="button" value="save" id="edge-saveButton" />
+        <input type="button" value="cancel" id="edge-cancelButton" />
+    </div>
+
+    <br />
+
+
+    <div id="mynetwork">
+
+    </div>
+
+</body>
+
+</html>
