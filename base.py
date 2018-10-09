@@ -17,7 +17,6 @@ class Serv(BaseHTTPRequestHandler):
         self._set_headers()
 
     def do_POST(self):
-        self._set_headers()
         print ("in post method")
         self.data_string = self.rfile.read(int(self.headers['Content-Length']))
         data = json.loads(self.data_string)

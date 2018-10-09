@@ -32,63 +32,25 @@
             <input type="hidden" id="id" value="145198" name="id"></dd>
             <dt id="send_message-label">&nbsp;</dt>
             <dd id="send_message-element">
-            <input type="submit" class="sendamessage" value="Send" id="send_message" name="send_message"></dd>
+            <!--<input type="submit" class="sendamessage" value="Send" id="send_message" name="send_message"> -->
+                <button type="button" onclick="loadDoc()">Request data</button>
+            </dd>
         </div>
         </form>
-        <div id="bio"></div>
         <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
-        <script type="text/javascript">
-            function($) {
 
-  'use strict';
-
-  var $btn = $('input.sendamessage');
-  var $bio = $('#bio');
-  data $('textarea#message').val()
-
-  // register an event
-  $btn.click(function(event){
-      event.preventDefault();
-    // hide the button
-    $(this).hide();
-    // send the request and get the response
-    $bio.load("localhost:8080 $data" , completeFunction);
-  });
-
-
-  // complete function
-  function completeFunction(responseText, textStatus, request) {
-    // add a border
-    $bio.css('border', '1px solid #e8e8e8');
-    // uncomment the line below to see the request
-     console.log(request);
-    // check if there are any errors
-    if(textStatus == 'error') {
-      // show a relevant message
-      $bio.text('An error occurred during your request: ' +  request.status + ' ' + request.statusText);
+<script>
+function loadDoc() {
+  var xhttp = new XMLHttpRequest();
+  var message = $('textarea#message').val();
+  xhttp.onreadystatechange = function() {
+    if (this.readyState == 4 && this.status == 200) {
+      document.getElementById("message").innerHTML = this.responseText;
     }
-  }
-
-  // });
-
-})(jQuery);
-        </script>
-      <!--  <script type="text/javascript">
-        $("input.sendamessage").click(function(event) {
-        event.preventDefault();
-        
-        var message = $('textarea#message').val();
-        var id      = $('input#id').val();
-        url = "http://localhost:8080"
-        var posting = $.post(url, message)
-        posting.done(function( data ) {
-          alert('done');
-        });
-        });
-        -->
-
-        
-        
-        </script>
+  };
+  xhttp.open("POST", "http://localhost:8080", true);
+  xhttp.send(message);
+}
+</script>
 </body>
 </html>
