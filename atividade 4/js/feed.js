@@ -80,8 +80,95 @@ function setData() {
                 to: '8',
                 label: '120'
         });
+
+        // let send = JSON.stringify({"edges": edges, "connections": [
+        //         {"begin":"1", "end": "8"},
+		// 		{"begin":"2", "end": "5"}]});
+				
+		let vezes = prompt("Quantidade de vezes", "5");
+
+		con = [];
+		
+		for (let index = 0; index < parseInt(vezes); index++) {
+
+			do {
+				var rand1 = Math.floor(Math.random() * 8 ) + 1;
+				var rand2 = Math.floor(Math.random() * 8 ) + 1;
+				console.log("re - random")
+			} while (rand1 == rand2);
+
+			con.push({"begin":rand1.toString(), "end": rand2.toString()})
+		}
+		
+		let send = JSON.stringify({"edges": edges, 
+			"connections": con
+		});
+		// console.log(con.lenght)
+		loadDoc(send);	
+		// if (vezes == null || vezes == "") {
+		// 	txt = 1000;
+		// }
+
+		// console.log(edges)
+
+        
+        
+        // console.log();
         return {
                 nodes: nodes,
                 edges: edges
         };
+}
+
+
+
+function loadDoc(send) {
+        var xhttp = new XMLHttpRequest();
+        var message = send;
+        xhttp.onreadystatechange = function() {
+			if (this.readyState == 4 && this.status == 200) {
+	    		// document.getElementById("message").innerHTML = this.responseText;
+				console.log(this.responseText)
+				let json = JSON.parse(this.responseText);
+				console.log(json)
+				// for (const key in json) {
+				// 	if (json.hasOwnProperty(key)) {
+				// 		// const element = object[key];
+				// 		var ul = document.getElementById("respostas");
+				// 		var li = document.createElement("li");
+				// 		li.appendChild(document.createTextNode(JSON.stringify(json[key])));
+				// 		ul.appendChild(li);
+						
+				// 		// console.log(json[key].toString())
+				// 	}
+				// }
+			}
+        };
+        xhttp.open("POST", "http://localhost:8080", true);
+        xhttp.send(message);
+}
+
+
+function checktopo(){
+	let vezes = prompt("Quantidade de vezes", "5");
+
+	con = [];
+	
+	for (let index = 0; index < parseInt(vezes); index++) {
+
+		do {
+			var rand1 = Math.floor(Math.random() * 8 ) + 1;
+			var rand2 = Math.floor(Math.random() * 8 ) + 1;
+			console.log("re - random")
+		} while (rand1 == rand2);
+
+		con.push({"begin":rand1.toString(), "end": rand2.toString()})
+	}
+	
+	// console.log(data.edges)
+	let send = JSON.stringify({"edges": data.edges, 
+		"connections": con
+	});
+
+	loadDoc(send);
 }
