@@ -158,6 +158,7 @@
                 }
             };
             network = new vis.Network(container, data, options);
+            console.log("criando novo grafo");
         }
 
         function editNode(data, cancelAction, callback) {
@@ -221,14 +222,17 @@
         function init() {
             // setDefaultLocale();
             // addNodeMode();
-            draw();
+            draw(data);
         }
+
+
     </script>
 </head>
 
 <body onload="init();">
 
     <input type="button" value="checar topologia" onclick="checktopo()"/>
+    <input type="file" id="myFile" onchange='loadFile()'>
     <div id="node-popUp">
         <span id="node-operation">node</span> <br>
         <table style="margin:auto;">
@@ -263,14 +267,15 @@
     <div id="mynetwork">
 
     </div>
-
+    <input type="text" id="file-name" value="" placeholder="File name"/>
+    <input type="button" id="dwn-btn" value="Save data"/>
     <div class="text">
         <h3>Respostas</h3>
         <ul id="respostas" class="respostas">
-            
         </ul>
+        <p id="retorno"></p>
     </div>
-
+    <script src="./js/fileIO.js"></script>
 </body>
 
 </html>
