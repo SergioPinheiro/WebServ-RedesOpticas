@@ -78,7 +78,6 @@ class Serv(BaseHTTPRequestHandler):
         for conection in json_G['connections']:
             short = nx.single_source_dijkstra(G, conection['begin'], conection['end'], weight='weight')
             resp["{}-{}".format(conection['begin'], conection['end'])] = short
-        # resp = dict()
         return resp
 
 def run(server_class=HTTPServer, handler_class=Serv, port=8080):

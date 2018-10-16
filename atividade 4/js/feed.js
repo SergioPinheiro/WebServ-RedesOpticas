@@ -1,95 +1,39 @@
 var dijkstra;
 function setData() {
-        var nodes = [];
-        var edges = [];
+        var nodesArray, edgesArray, nodes, edges;
+        nodesArray = [];
         //fazer - pacific bell
         // randomly create some nodes and edges
         for (var i = 1; i <= 8; i++) {
-                nodes.push({
-                        id: i,
-                        label: String(i)
-                });
+                nodesArray.push({id: i, label: String(i)});
         }
-        
-        edges.push({
-                from: '1',
-                to: '2',
-                label: '50'
-        });
-        edges.push({
-                from: '1',
-                to: '4',
-                label: '80'
-        });
-        edges.push({
-                from: '1',
-                to: '6',
-                label: '150'
-        });
-        edges.push({
-                from: '2',
-                to: '3',
-                label: '60'
-        });
-        edges.push({
-                from: '2',
-                to: '4',
-                label: '40'
-        });
-        edges.push({
-                from: '2',
-                to: '5',
-                label: '90'
-        });
-        edges.push({
-                from: '3',
-                to: '5',
-                label: '110'
-        });
-        edges.push({
-                from: '3',
-                to: '8',
-                label: '150'
-        });
-        edges.push({
-                from: '4',
-                to: '6',
-                label: '150'
-        });
-        edges.push({
-                from: '4',
-                to: '7',
-                label: '130'
-        });
-        edges.push({
-                from: '5',
-                to: '7',
-                label: '120'
-        });
-        edges.push({
-                from: '5',
-                to: '8',
-                label: '130'
-        });
-        edges.push({
-                from: '6',
-                to: '7',
-                label: '120'
-        });
-        edges.push({
-                from: '7',
-                to: '8',
-                label: '120'
-        });
 
-        // let send = JSON.stringify({"edges": edges, "connections": [
-        //         {"begin":"1", "end": "8"},
-		// 		{"begin":"2", "end": "5"}]});
-				
-		let vezes = prompt("Quantidade de vezes", "5");
+        edgesArray = [
+            {from: 1, to: 2, label: '50'},
+            {from: 1, to: 4, label: '80'},
+            {from: 1, to: 6, label: '150'},
+            {from: 2, to: 3, label: '60'},
+            {from: 2, to: 4, label: '40'},
+            {from: 2, to: 5, label: '90'},
+            {from: 3, to: 5, label: '110'},
+            {from: 3, to: 8, label: '150'},
+            {from: 4, to: 6, label: '150'},
+            {from: 4, to: 7, label: '130'},
+            {from: 5, to: 7, label: '120'},
+            {from: 5, to: 8, label: '130'},
+            {from: 6, to: 7, label: '120'},
+            {from: 7, to: 8, label: '120'}];
+
+        nodes = new vis.DataSet(nodesArray);
+        edges = new vis.DataSet(edgesArray);
+
+        //edges.update({id:"1acf0638-7138-48ad-907e-e7a1bb9dc896", from:7, to:8, label: 150});
+        //sintaxe para dar update, não precisa todos os campos;
+
+		/*let vezes = prompt("Quantidade de vezes", "5");
 
 		con = [];
-		
+
 		for (let index = 0; index < parseInt(vezes); index++) {
 
 			do {
@@ -98,30 +42,13 @@ function setData() {
 				console.log("re - random")
 			} while (rand1 == rand2);
 
-			con.push({"begin":rand1.toString(), "end": rand2.toString()})
+			con.push({"begin":rand1, "end": rand2})
 		}
-		
-		let send = JSON.stringify({"edges": edges, 
-			"connections": con
-		});
-		// console.log(con.lenght)
-		loadDoc(send);	
-		// if (vezes == null || vezes == "") {
-		// 	txt = 1000;
-		// }
 
-		// console.log(edges)
-
-        
-        
-        // console.log();
-        return {
-                nodes: nodes,
-                edges: edges
-        };
+		let send = JSON.stringify({"edges": edges.get(),"connections": con});
+		loadDoc(send);*/
+        return {nodes: nodes, edges: edges};
 }
-
-
 
 function loadDoc(send) {
         var xhttp = new XMLHttpRequest();
@@ -153,7 +80,7 @@ function checktopo(){
 	let vezes = prompt("Quantidade de vezes", "5");
 
 	con = [];
-	
+
 	for (let index = 0; index < parseInt(vezes); index++) {
 
 		do {
@@ -162,30 +89,20 @@ function checktopo(){
 			console.log("re - random")
 		} while (rand1 == rand2);
 
-		con.push({"begin":rand1.toString(), "end": rand2.toString()})
+		con.push({"begin":rand1, "end": rand2})
 	}
-	
+	let arestas = networkData.edges.get();
 	// console.log(data.edges)
-	let send = JSON.stringify({"edges": data.edges, 
+	let send = JSON.stringify({"edges": arestas,
 		"connections": con
 	});
 
 	loadDoc(send);
 }
 
-
-function prepareData(nodes,edges,dijkstra){
-     if (dijkstra === undefined) {
-          y = 0;
-    }
-    let dataToSave, textData;
-    dataToSave = {
-				    nodes: nodes,
-                    edges: edges,
-                    dijkstra: dijkstra
-                };
-    textData = JSON.stringify(dataToSave);
-    return textData;
+function debugData(){
+    console.log(networkData.nodes);
 }
+
 
 
