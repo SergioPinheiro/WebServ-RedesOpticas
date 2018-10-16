@@ -74,10 +74,16 @@ class Serv(BaseHTTPRequestHandler):
         # print(json_G['edges'])
         for edge in json_G['edges']:
             G.add_edge(edge['from'], edge['to'], weight=int(edge['label']))
-        resp = dict()
+        resp = list()
         for conection in json_G['connections']:
+            item = dict()
             short = nx.single_source_dijkstra(G, conection['begin'], conection['end'], weight='weight')
-            resp["{}-{}".format(conection['begin'], conection['end'])] = short
+            item['id'] = "{}-{}".format(conection['begin'], conection['end'])
+            item['finalWeight'] = short[0]
+            item['path'] = short[1]
+            resp.append(item)
+        resp = sorted(resp, key=lambda i: i['finalWeight'])
+        print(resp)
         return resp
 
 def run(server_class=HTTPServer, handler_class=Serv, port=8080):

@@ -56,8 +56,8 @@ function loadDoc(send) {
         xhttp.onreadystatechange = function() {
 			if (this.readyState == 4 && this.status == 200) {
 				let json = JSON.parse(this.responseText);
-				console.log(json);
 				dijkstra = json;
+				console.log(json);
 				// for (const key in json) {
 				// 	if (json.hasOwnProperty(key)) {
 				// 		// const element = object[key];
