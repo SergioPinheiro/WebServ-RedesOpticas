@@ -3,6 +3,13 @@ import json
 import networkx as nx
 import os
 
+def sum_weight(path, graph):
+    sum = 0
+    for i in range(len(path)-1):
+        sum += graph.edges[path[i], path[i+1]]["weight"]
+    return sum
+
+
 class Serv(BaseHTTPRequestHandler):
 
     # def __init__(self):
@@ -58,7 +65,7 @@ class Serv(BaseHTTPRequestHandler):
         print ("in post method")
         self.data_string = self.rfile.read(int(self.headers['Content-Length']))
         data = json.loads(self.data_string)
-        print(data)
+        #print(data)
         self.send_response(200)
         self.send_header('Content-type', 'application/json')
         self.end_headers()
@@ -71,19 +78,37 @@ class Serv(BaseHTTPRequestHandler):
 
     def dkt(self, json_G):
         G = nx.Graph()
+        resp = list()
+        global_paths = dict()
         # print(json_G['edges'])
         for edge in json_G['edges']:
             G.add_edge(edge['from'], edge['to'], weight=int(edge['label']))
-        resp = list()
+
         for conection in json_G['connections']:
             item = dict()
-            short = nx.single_source_dijkstra(G, conection['begin'], conection['end'], weight='weight')
             item['id'] = "{}-{}".format(conection['begin'], conection['end'])
-            item['finalWeight'] = short[0]
-            item['path'] = short[1]
-            resp.append(item)
+            reverse_id = "{}-{}".format(conection['end'], conection['begin'])
+            has_pathlist = False
+            while not has_pathlist:
+                try:
+                    if len(global_paths[item["id"]]) > 0:
+                        item['path'] = global_paths[item["id"]].pop(0)
+                        global_paths[reverse_id].pop(0)
+                        item['finalWeight'] = sum_weight(item['path'], G)
+                        resp.append(item)
+                        has_pathlist = True
+                    else:
+                        has_pathlist = True
+                except KeyError:
+                    global_paths[item['id']] = list(
+                        nx.shortest_simple_paths(G, conection['begin'], conection['end'], weight='weight'))
+                    global_paths[reverse_id] = list(
+                        nx.shortest_simple_paths(G, conection['end'], conection['begin'], weight='weight'))
+
         resp = sorted(resp, key=lambda i: i['finalWeight'])
         print(resp)
+        for key in global_paths.keys():
+            print("{} - {}".format(key, global_paths[key]))
         return resp
 
 def run(server_class=HTTPServer, handler_class=Serv, port=8080):
