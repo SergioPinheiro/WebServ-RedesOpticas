@@ -9,6 +9,50 @@ def sum_weight(path, graph):
         sum += graph.edges[path[i], path[i+1]]["weight"]
     return sum
 
+def block_wavelenght_in_path(graph, path, wavelenght):
+    for i in range(len(path)-1):
+        graph.edges[path[i], path[i + 1]]['wavelenghts'][str(wavelenght)] = True
+
+def free_wavelenght_in_path(graph, path, wavelenght):
+    for i in range(len(path)-1):
+        graph.edges[path[i], path[i + 1]]['wavelenghts'][str(wavelenght)] = False
+
+
+def first_fit(graph, paths, nwavelenght, id):
+    resp = dict()
+    i = 0
+    path = list()
+    final_wavelenght = 0
+    finishSearch = False
+    while (not finishSearch and (i < len(paths))):
+        j = 0
+        while (not finishSearch and (j < nwavelenght)):
+            k = 0
+            while (not finishSearch and (k < len(paths[i])-1)):
+                if(graph.edges[paths[i][k], paths[i][k+1]]['wavelenghts'][str(j)]==True):
+                    break
+                elif k == (len(paths[i])-2):
+                    path = paths[i]
+                    final_wavelenght = j
+                    finishSearch = True
+                k += 1
+            j += 1
+        if i == (len(paths) - 1) and not finishSearch:
+            final_wavelenght = -1
+        i += 1
+
+    resp['id'] = id
+    resp['path'] = path
+    if(len(path)>0):
+        resp['finalWeight'] = sum_weight(path, graph)
+        block_wavelenght_in_path(graph, path, final_wavelenght)
+    else:
+        resp['finalWeight'] = 0
+    resp['wavelenght'] = final_wavelenght
+    return resp
+
+
+
 
 class Serv(BaseHTTPRequestHandler):
 
@@ -79,31 +123,34 @@ class Serv(BaseHTTPRequestHandler):
     def dkt(self, json_G):
         G = nx.Graph()
         resp = list()
+        n_wave_lenghts = int(json_G['nwavelenghts'])
+        wave_lenghts = dict()
         global_paths = dict()
-        # print(json_G['edges'])
+        # O boleano indica se o comprimento de onda está ou não sendo usado. Ex: True = Está sendo usado
+        for i in range(n_wave_lenghts):
+            wave_lenghts[str(i)] = False
         for edge in json_G['edges']:
-            G.add_edge(edge['from'], edge['to'], weight=int(edge['label']))
+            G.add_edge(edge['from'], edge['to'], weight=int(edge['label']), wavelenghts=wave_lenghts.copy())
 
         for conection in json_G['connections']:
-            item = dict()
-            item['id'] = "{}-{}".format(conection['begin'], conection['end'])
+            id = "{}-{}".format(conection['begin'], conection['end'])
             reverse_id = "{}-{}".format(conection['end'], conection['begin'])
             has_pathlist = False
             while not has_pathlist:
                 try:
-                    if len(global_paths[item["id"]]) > 0:
-                        item['path'] = global_paths[item["id"]].pop(0)
-                        global_paths[reverse_id].pop(0)
-                        item['finalWeight'] = sum_weight(item['path'], G)
-                        resp.append(item)
-                        has_pathlist = True
-                    else:
+                    if len(global_paths[id]) > 0:
+                        resp.append(first_fit(G, global_paths[id], n_wave_lenghts, id))
                         has_pathlist = True
                 except KeyError:
-                    global_paths[item['id']] = list(
-                        nx.shortest_simple_paths(G, conection['begin'], conection['end'], weight='weight'))
-                    global_paths[reverse_id] = list(
-                        nx.shortest_simple_paths(G, conection['end'], conection['begin'], weight='weight'))
+                    try:
+                        global_paths[id] = list(
+                            nx.shortest_simple_paths(G, conection['begin'], conection['end'], weight='weight'))
+                        global_paths[reverse_id] = list(
+                            nx.shortest_simple_paths(G, conection['end'], conection['begin'], weight='weight'))
+                    except (nx.NetworkXNoPath, nx.exception.NetworkXError, nx.NodeNotFound):
+                        #altera a flag em caso de erro para ir para o proximo item
+                        has_pathlist = True
+                        continue
 
         resp = sorted(resp, key=lambda i: i['finalWeight'])
         print(resp)

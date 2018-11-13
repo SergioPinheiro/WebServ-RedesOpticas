@@ -78,6 +78,7 @@ function loadDoc(send) {
 
 function checktopo(){
 	let vezes = prompt("Quantidade de vezes", "5");
+	let nCompOnda = prompt("Numero de comprimentos de onda", 1);
 
 	con = [];
 
@@ -94,7 +95,8 @@ function checktopo(){
 	let arestas = networkData.edges.get();
 	// console.log(data.edges)
 	let send = JSON.stringify({"edges": arestas,
-		"connections": con
+		"connections": con,
+        "nwavelenghts" : nCompOnda
 	});
 
 	loadDoc(send);
