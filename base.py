@@ -17,7 +17,6 @@ def free_wavelenght_in_path(graph, path, wavelenght):
     for i in range(len(path)-1):
         graph.edges[path[i], path[i + 1]]['wavelenghts'][str(wavelenght)] = False
 
-
 def first_fit(graph, paths, nwavelenght, id):
     resp = dict()
     i = 0

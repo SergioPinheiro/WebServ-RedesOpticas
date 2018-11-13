@@ -1,4 +1,6 @@
 import networkx as nx
+import numpy as np
+import time
 
 def sum_weight(path, graph):
     sum = 0
@@ -78,13 +80,15 @@ conections = [
     {"begin": 111, "end": 530}
 ]
 
-
-
 G = nx.Graph()
 resp = list()
 n_wave_lenghts = 2
 wave_lenghts = dict()
 global_paths = dict()
+seconds = 300
+lmbda = len(conections)/seconds
+conections_interval = -np.log(1.0 - np.random.random_sample(len(conections))) / lmbda
+conections_duration = -np.log(1.0 - np.random.random_sample(len(conections))) / lmbda
 
 for i in range(n_wave_lenghts):
     wave_lenghts[str(i)] = False
@@ -92,6 +96,7 @@ for edge in edgesArray:
     G.add_edge(edge['from'], edge['to'], weight=int(edge['label']), wavelenghts=wave_lenghts.copy() )
 
 for conection in conections:
+    poisson_index = 0
     id = "{}-{}".format(conection['begin'], conection['end'])
     reverse_id = "{}-{}".format(conection['end'], conection['begin'])
     item_ready = False
@@ -108,6 +113,8 @@ for conection in conections:
                     nx.shortest_simple_paths(G, conection['end'], conection['begin'], weight='weight'))
             except (nx.NetworkXNoPath, nx.exception.NetworkXError, nx.NodeNotFound):
                 item_ready = True
+                time.sleep(conections_interval[poisson_index])
+                poisson_index +=1
                 continue
 
 resp = sorted(resp, key=lambda i: i['finalWeight'])

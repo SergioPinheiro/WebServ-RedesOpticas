@@ -1,10 +1,10 @@
-import random
-
-print("Here is a single sample from a uniform random variable")
-print(random.random())
-print("Here is a list of three samples:")
-uniSamples = [random.random(), random.random(), random.random()]
-print(uniSamples)
-print("Here is a list of three exponential samples:")
-expSamples = [random.expovariate(1.0), random.expovariate(1.0), random.expovariate(1.0)]
-print(expSamples)
+import numpy as np
+N = 3000
+T = 300
+lmbda = N/T
+y = -np.log(1.0 - np.random.random_sample(int(N))) / lmbda
+for i in range(len(y)):
+    print(y[i])
+print(np.average(y))
+print(lmbda)
+print(sum(y))

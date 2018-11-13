@@ -79,7 +79,7 @@ function loadDoc(send) {
 function checktopo(){
 	let vezes = prompt("Quantidade de vezes", "5");
 	let nCompOnda = prompt("Numero de comprimentos de onda", 1);
-	let tempo = prompt("total de tempo de simulação em segundos");
+	let tempo = prompt("total de tempo de simulação em segundos", 300);
 
 	con = [];
 
