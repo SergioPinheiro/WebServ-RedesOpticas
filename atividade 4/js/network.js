@@ -118,7 +118,7 @@ function saveEdgeData(data, callback) {
         networkData.edges.update({id:data.id, from: data.from});
     }
     data.label = document.getElementById('edge-label').value;
-    networkData.edges.update({id:data.id, label:data.label});
+    // networkData.edges.update({id:data.id, label:data.label});
     clearEdgePopUp();
     callback(data);
 }
