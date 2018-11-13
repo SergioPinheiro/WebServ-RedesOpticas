@@ -1,17 +1,10 @@
-counter = 0
-findPath = False
-finishSearch = False
-i = 0
-while(not finishSearch and (i < 10)):
-    j = 0
-    while(not finishSearch and (j<3)):
-        k = 0
-        while (not finishSearch and (k <2)):
-            counter +=1;
-            if(k==1):
-                finishSearch = True
-            k += 1
-        j+=1
-    i += 1
+import random
 
-print(counter)
+print("Here is a single sample from a uniform random variable")
+print(random.random())
+print("Here is a list of three samples:")
+uniSamples = [random.random(), random.random(), random.random()]
+print(uniSamples)
+print("Here is a list of three exponential samples:")
+expSamples = [random.expovariate(1.0), random.expovariate(1.0), random.expovariate(1.0)]
+print(expSamples)

@@ -79,6 +79,7 @@ function loadDoc(send) {
 function checktopo(){
 	let vezes = prompt("Quantidade de vezes", "5");
 	let nCompOnda = prompt("Numero de comprimentos de onda", 1);
+	let tempo = prompt("total de tempo de simulação em segundos");
 
 	con = [];
 
@@ -96,7 +97,8 @@ function checktopo(){
 	// console.log(data.edges)
 	let send = JSON.stringify({"edges": arestas,
 		"connections": con,
-        "nwavelenghts" : nCompOnda
+        "nwavelenghts" : nCompOnda,
+        "tempo" : tempo
 	});
 
 	loadDoc(send);
