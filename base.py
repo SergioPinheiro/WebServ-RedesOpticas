@@ -1,7 +1,9 @@
 from http.server import HTTPServer, BaseHTTPRequestHandler
 import json
 import networkx as nx
-import os
+import numpy as np
+import time
+from threading import Thread, Lock
 
 def sum_weight(path, graph):
     sum = 0
@@ -9,28 +11,46 @@ def sum_weight(path, graph):
         sum += graph.edges[path[i], path[i+1]]["weight"]
     return sum
 
-def block_wavelenght_in_path(graph, path, wavelenght):
-    for i in range(len(path)-1):
+def block_wavelenght_in_path(lock, path, wavelenght, c_duration, index, jobs_list, graph):
+    print("bloqueando caminho", path, wavelenght)
+    lock.acquire()
+    for i in range(len(path) - 1):
         graph.edges[path[i], path[i + 1]]['wavelenghts'][str(wavelenght)] = True
+    lock.release()
+    print("caminho bloqueado", path, wavelenght)
+    wake_time = c_duration[index['poisson_duration']]
+    print('incrementando valor de indice de duração de {} para {}'.format(index['poisson_duration'], index['poisson_duration']+1))
+    index['poisson_duration'] += 1
+    print('iniciando processo para caminho', path, wavelenght)
+    p = Thread(target=free_wavelenght_in_path, args=(lock, path, wavelenght, wake_time, graph))
+    jobs_list.append(p)
+    p.start()
 
-def free_wavelenght_in_path(graph, path, wavelenght):
-    for i in range(len(path)-1):
+def free_wavelenght_in_path(lock, path, wavelenght, wake_time, graph):
+    print("esperando {} segundos para liberar caminho {} {}".format(wake_time, path, wavelenght))
+    time.sleep(wake_time)
+    print("liberando caminho", path, wavelenght)
+    lock.acquire()
+    for i in range(len(path) - 1):
         graph.edges[path[i], path[i + 1]]['wavelenghts'][str(wavelenght)] = False
+    lock.release()
+    print("caminho liberado", path, wavelenght)
 
-def first_fit(graph, paths, nwavelenght, id):
+def first_fit(lock, graph, paths, nwavelenght, id, conections_duration, index, jobs_list):
     resp = dict()
     i = 0
     path = list()
     final_wavelenght = 0
     finishSearch = False
-    while (not finishSearch and (i < len(paths))):
+    while not finishSearch and (i < len(paths)):
         j = 0
-        while (not finishSearch and (j < nwavelenght)):
+        while not finishSearch and (j < nwavelenght):
             k = 0
-            while (not finishSearch and (k < len(paths[i])-1)):
-                if(graph.edges[paths[i][k], paths[i][k+1]]['wavelenghts'][str(j)]==True):
+            while not finishSearch and (k < len(paths[i]) - 1):
+                # se o comprimento de onda estiver sendo utilizado o loop para
+                if graph.edges[paths[i][k], paths[i][k + 1]]['wavelenghts'][str(j)]:
                     break
-                elif k == (len(paths[i])-2):
+                elif k == (len(paths[i]) - 2):
                     path = paths[i]
                     final_wavelenght = j
                     finishSearch = True
@@ -39,14 +59,14 @@ def first_fit(graph, paths, nwavelenght, id):
         if i == (len(paths) - 1) and not finishSearch:
             final_wavelenght = -1
         i += 1
-
     resp['id'] = id
     resp['path'] = path
-    if(len(path)>0):
+    if (len(path) > 0):
         resp['finalWeight'] = sum_weight(path, graph)
-        block_wavelenght_in_path(graph, path, final_wavelenght)
+        block_wavelenght_in_path(lock, path, final_wavelenght, conections_duration, index, jobs_list, graph)
     else:
         resp['finalWeight'] = 0
+        print('não deu fit', id)
     resp['wavelenght'] = final_wavelenght
     return resp
 
@@ -113,10 +133,10 @@ class Serv(BaseHTTPRequestHandler):
         self.send_header('Content-type', 'application/json')
         self.end_headers()
         # self.wfile.write(bytes("hello"), 'utf-8')
-        try:
-            self.wfile.write(json.dumps(self.dkt(data)).encode())
-        except:
-            print('Dijkstra error!')
+        #try:
+        self.wfile.write(json.dumps(self.dkt(data)).encode())
+        #except:
+         #   print('Dijkstra error!')
         return
 
     def dkt(self, json_G):
@@ -125,6 +145,21 @@ class Serv(BaseHTTPRequestHandler):
         n_wave_lenghts = int(json_G['nwavelenghts'])
         wave_lenghts = dict()
         global_paths = dict()
+        lmbda = len(json_G['connections']) / int(json_G['tempo'])
+        conections_interval = -np.log(1.0 - np.random.random_sample(len(json_G['connections']))) / lmbda
+        lmbda = lmbda
+        conections_duration = -np.log(1.0 - np.random.random_sample(len(json_G['connections']))) / lmbda
+        #conections_duration = [15]*len(json_G['connections'])
+        l = Lock()
+        jobs = []
+        indexes = {'poisson_interval': 0, 'poisson_duration': 0}
+        print('variaveis declaradas')
+        print('lista de intervalos')
+        print(conections_interval)
+        print('lista de durações')
+        print(conections_duration)
+
+
         # O boleano indica se o comprimento de onda está ou não sendo usado. Ex: True = Está sendo usado
         for i in range(n_wave_lenghts):
             wave_lenghts[str(i)] = False
@@ -138,8 +173,10 @@ class Serv(BaseHTTPRequestHandler):
             while not has_pathlist:
                 try:
                     if len(global_paths[id]) > 0:
-                        resp.append(first_fit(G, global_paths[id], n_wave_lenghts, id))
+                        resp.append(first_fit(l, G, global_paths[id], n_wave_lenghts, id, conections_duration, indexes, jobs))
                         has_pathlist = True
+                        time.sleep(conections_interval[indexes['poisson_interval']])
+                        indexes['poisson_interval'] += 1
                 except KeyError:
                     try:
                         global_paths[id] = list(
@@ -149,13 +186,25 @@ class Serv(BaseHTTPRequestHandler):
                     except (nx.NetworkXNoPath, nx.exception.NetworkXError, nx.NodeNotFound):
                         #altera a flag em caso de erro para ir para o proximo item
                         has_pathlist = True
+                        time.sleep(conections_interval[indexes['poisson_interval']])
+                        indexes['poisson_interval'] += 1
                         continue
 
         resp = sorted(resp, key=lambda i: i['finalWeight'])
-        print(resp)
+        falhas = 0
+        for i in resp:
+            if i['wavelenght'] == -1:
+                falhas+=1
+        prob_falha = falhas/len(json_G['connections'])
+        final_resp = dict()
+        final_resp['connections'] = resp
+        final_resp['falha'] = prob_falha
+
+        print(final_resp)
         for key in global_paths.keys():
             print("{} - {}".format(key, global_paths[key]))
-        return resp
+
+        return final_resp
 
 def run(server_class=HTTPServer, handler_class=Serv, port=8080):
     # web_dir = os.path.join(os.path.dirname(__file__), './atividade 4/')
