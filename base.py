@@ -173,9 +173,14 @@ class Serv(BaseHTTPRequestHandler):
             while not has_pathlist:
                 try:
                     if len(global_paths[id]) > 0:
-                        resp.append(first_fit(l, G, global_paths[id], n_wave_lenghts, id, conections_duration, indexes, jobs))
+                        resp.append(first_fit(l, G, global_paths[id], n_wave_lenghts, id, conections_duration, indexes,
+                                              jobs))
                         has_pathlist = True
+                        print('esperando {} segundos até iniciar nova conexão'.format(conections_interval[
+                                                                                          indexes['poisson_interval']]))
                         time.sleep(conections_interval[indexes['poisson_interval']])
+                        print('aumentando indice de intervalo de {} para {}'.format(indexes['poisson_interval'],
+                                                                                    indexes['poisson_interval']+1))
                         indexes['poisson_interval'] += 1
                 except KeyError:
                     try:
@@ -186,7 +191,11 @@ class Serv(BaseHTTPRequestHandler):
                     except (nx.NetworkXNoPath, nx.exception.NetworkXError, nx.NodeNotFound):
                         #altera a flag em caso de erro para ir para o proximo item
                         has_pathlist = True
+                        print('esperando {} segundos até iniciar nova conexão'.format(conections_interval[
+                                                                                          indexes['poisson_interval']]))
                         time.sleep(conections_interval[indexes['poisson_interval']])
+                        print('aumentando indice de intervalo de {} para {}'.format(indexes['poisson_interval'],
+                                                                                    indexes['poisson_interval'] + 1))
                         indexes['poisson_interval'] += 1
                         continue
 
