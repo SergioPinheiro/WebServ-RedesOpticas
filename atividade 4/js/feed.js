@@ -102,17 +102,17 @@ function loadDoc(send) {
 
 
 function checktopo(){
-	let vezes = prompt("Quantidade de vezes", "5");
-	let nCompOnda = prompt("Numero de comprimentos de onda", 1);
+	let vezes = prompt("Quantidade de vezes", 5);
+	let nCompOnda = prompt("Numero de comprimentos de onda", 5);
 	let tempo = prompt("total de tempo de simulação em segundos", 300);
 
 	con = [];
-
+	let n_nodes = networkData.nodes.get().length;
 	for (let index = 0; index < parseInt(vezes); index++) {
 
 		do {
-			var rand1 = Math.floor(Math.random() * 8 ) + 1;
-			var rand2 = Math.floor(Math.random() * 8 ) + 1;
+			var rand1 = Math.floor(Math.random() * n_nodes ) + 1;
+			var rand2 = Math.floor(Math.random() * n_nodes ) + 1;
 			console.log("re - random")
 		} while (rand1 == rand2);
 
