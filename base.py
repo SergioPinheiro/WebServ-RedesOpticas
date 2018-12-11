@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 from http.server import HTTPServer, BaseHTTPRequestHandler
 import json
 import networkx as nx

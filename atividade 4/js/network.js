@@ -2,7 +2,8 @@ var network, networkData, seed;
 network= null;
 // randomly create some nodes and edges
 networkData = setData();
-seed = 2;
+seed = 4;
+//4
 
 // console.log(JSON.stringify(data))
 function destroy() {
@@ -83,8 +84,10 @@ function cancelNodeEdit(callback) {
 function saveNodeData(data, callback) {
     data.label = document.getElementById('node-label').value;
     networkData.nodes.update({id:data.id, label:data.label});
+    // console.log(data)
     clearNodePopUp();
     callback(data);
+    
 }
 
 function editEdgeWithoutDrag(data, callback) {
@@ -120,6 +123,7 @@ function saveEdgeData(data, callback) {
     data.label = document.getElementById('edge-label').value;
     // networkData.edges.update({id:data.id, label:data.label});
     clearEdgePopUp();
+    
     callback(data);
 }
 

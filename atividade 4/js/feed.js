@@ -4,25 +4,50 @@ function setData() {
         nodesArray = [];
         //fazer - pacific bell
         // randomly create some nodes and edges
-        for (var i = 1; i <= 8; i++) {
+        for (var i = 1; i <= 17; i++) {
                 nodesArray.push({id: i, label: String(i)});
         }
-
         edgesArray = [
-            {from: 1, to: 2, label: '50'},
-            {from: 1, to: 4, label: '80'},
-            {from: 1, to: 6, label: '150'},
-            {from: 2, to: 3, label: '60'},
-            {from: 2, to: 4, label: '40'},
+            {from: 1, to: 3, label: '100'},
+            {from: 1, to: 4, label: '90'},
+            {from: 1, to: 5, label: '100'},
+            {from: 1, to: 6, label: '120'},
+            {from: 1, to: 7, label: '150'},
+            {from: 2, to: 4, label: '80'},
             {from: 2, to: 5, label: '90'},
-            {from: 3, to: 5, label: '110'},
-            {from: 3, to: 8, label: '150'},
-            {from: 4, to: 6, label: '150'},
-            {from: 4, to: 7, label: '130'},
-            {from: 5, to: 7, label: '120'},
-            {from: 5, to: 8, label: '130'},
-            {from: 6, to: 7, label: '120'},
-            {from: 7, to: 8, label: '120'}];
+            {from: 3, to: 8, label: '60'},
+            {from: 4, to: 9, label: '140'},
+            {from: 4, to: 10, label: '100'},
+            {from: 4, to: 13, label: '100'},
+            {from: 4, to: 16, label: '100'},
+            {from: 5, to: 9, label: '120'},
+            {from: 5, to: 14, label: '90'},
+            {from: 5, to: 16, label: '100'},
+            {from: 6, to: 15, label: '150'},
+            {from: 7, to: 8, label: '110'},
+            {from: 7, to: 10, label: '100'},
+            {from: 7, to: 11, label: '100'},
+            {from: 11, to: 12, label: '100'},
+            {from: 12, to: 13, label: '90'},
+            {from: 14, to: 17, label: '90'},
+            {from: 15, to: 17, label: '90'},
+
+        ];
+        // edgesArray = [
+        //     {from: 1, to: 2, label: '50'},
+        //     {from: 1, to: 4, label: '80'},
+        //     {from: 1, to: 6, label: '150'},
+        //     {from: 2, to: 3, label: '60'},
+        //     {from: 2, to: 4, label: '40'},
+        //     {from: 2, to: 5, label: '90'},
+        //     {from: 3, to: 5, label: '110'},
+        //     {from: 3, to: 8, label: '150'},
+        //     {from: 4, to: 6, label: '150'},
+        //     {from: 4, to: 7, label: '130'},
+        //     {from: 5, to: 7, label: '120'},
+        //     {from: 5, to: 8, label: '130'},
+        //     {from: 6, to: 7, label: '120'},
+        //     {from: 7, to: 8, label: '120'}];
 
         nodes = new vis.DataSet(nodesArray);
         edges = new vis.DataSet(edgesArray);
