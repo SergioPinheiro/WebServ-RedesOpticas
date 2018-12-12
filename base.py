@@ -4,6 +4,8 @@ import networkx as nx
 import numpy as np
 import time
 from threading import Thread, Lock
+from matplotlib import pyplot as plt
+from sklearn.preprocessing import normalize
 
 def sum_weight(path, graph):
     sum = 0
@@ -145,11 +147,17 @@ class Serv(BaseHTTPRequestHandler):
         n_wave_lenghts = int(json_G['nwavelenghts'])
         wave_lenghts = dict()
         global_paths = dict()
-        lmbda = len(json_G['connections']) / int(json_G['tempo'])
-        conections_interval = -np.log(1.0 - np.random.random_sample(len(json_G['connections']))) / lmbda
-        lmbda = lmbda
-        conections_duration = -np.log(1.0 - np.random.random_sample(len(json_G['connections']))) / lmbda
-        #conections_duration = [15]*len(json_G['connections'])
+        lmbda = int(len(json_G['connections']) / int(json_G['tempo']))
+        conections_interval =  normalize(np.random.poisson(int(json_G['tempo']), len(json_G['connections'])).reshape(-1, 10))
+        # conections_interval = -np.log(1.0 - np.random.random_sample(len(json_G['connections']))) / lmbda
+        # lmbda = lmbda*2
+        conections_interval = conections_interval.reshape(-1) / 10000
+        conections_duration =  normalize(np.random.poisson(int(json_G['tempo']), len(json_G['connections'])).reshape(-1, 10))
+        # conections_duration = -np.log(1.0 - np.random.random_sample(len(json_G['connections']))) / lmbda
+        # conections_duration = [15]*len(json_G['connections'])
+        conections_duration = conections_duration.reshape(-1)
+        count, bins, ignored = plt.hist(conections_duration, lmbda, density=True)
+        plt.show()
         l = Lock()
         jobs = []
         indexes = {'poisson_interval': 0, 'poisson_duration': 0}
